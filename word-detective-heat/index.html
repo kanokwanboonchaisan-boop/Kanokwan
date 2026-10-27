@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Word Detective: ความร้อนกับอุณหภูมิ</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#ffe9d6;--bg2:#d9ecff;--card:#ffffff;--tx:#1f2937;--mut:#6b7280;--bd:#e5e7eb;--g:#22c55e;--gt:#052e16;--y:#facc15;--yt:#422006;--r:#ef4444;--rt:#fff;--pri:#6366f1;--pt:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#2a1b2e;--bg2:#10213a;--card:#1e293b;--tx:#f1f5f9;--mut:#94a3b8;--bd:#334155}}
+:root[data-theme="dark"]{--bg1:#2a1b2e;--bg2:#10213a;--card:#1e293b;--tx:#f1f5f9;--mut:#94a3b8;--bd:#334155}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:'Prompt','Noto Sans Thai',Tahoma,sans-serif;color:var(--tx);background:linear-gradient(135deg,var(--bg1),var(--bg2));background-attachment:fixed}
+.wrap{max-width:720px;margin:0 auto;padding:16px}
+.card{background:var(--card);border-radius:20px;padding:20px;box-shadow:0 6px 24px rgba(0,0,0,.12);margin-bottom:14px}
+h1{margin:0 0 6px;font-size:28px}h2{margin:0 0 10px;font-size:20px}
+.mut{color:var(--mut);font-size:14px}
+.cats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.cat{border-radius:12px;padding:8px 10px;font-weight:600;font-size:14px;border:2px solid var(--bd)}
+.c0{background:#fee2e2;color:#7f1d1d}.c1{background:#dbeafe;color:#1e3a8a}.c2{background:#cffafe;color:#164e63}.c3{background:#ede9fe;color:#4c1d95}
+.rules{margin:8px 0 0;padding-left:20px;font-size:14px;line-height:1.7}
+input,select{font:inherit;padding:10px;border-radius:10px;border:2px solid var(--bd);background:var(--card);color:var(--tx);width:100%;margin-top:8px}
+.btn{font:inherit;font-weight:700;border:0;border-radius:14px;padding:12px 18px;background:var(--pri);color:var(--pt);cursor:pointer;width:100%;margin-top:12px;font-size:16px}
+.btn:active{transform:scale(.98)}
+.chk{margin-top:12px;padding:10px 12px;border-radius:12px;background:#dcfce7;color:#14532d;font-size:14px;font-weight:600}
+.chk.bad{background:#fee2e2;color:#7f1d1d}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.bar{height:10px;border-radius:99px;background:var(--bd);overflow:hidden;margin:10px 0}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#f97316,#ec4899,#6366f1);transition:width .3s}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:4px 10px;border-radius:99px;background:var(--bd);font-size:13px;font-weight:600}
+.chip.on{background:var(--pri);color:var(--pt)}
+.turn{font-weight:700;color:var(--pri);margin:6px 0}
+.q{font-size:19px;font-weight:600;line-height:1.5;margin:6px 0 14px}
+.opt{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;text-align:left;font:inherit;font-size:16px;padding:14px;margin-bottom:10px;border-radius:14px;border:2px solid var(--bd);background:var(--card);color:var(--tx);cursor:pointer}
+.opt:disabled{cursor:default}
+.opt .tag{font-size:12px;font-weight:700;padding:3px 8px;border-radius:99px;white-space:nowrap}
+.opt.g{background:var(--g);color:var(--gt);border-color:var(--g)}
+.opt.y{background:var(--y);color:var(--yt);border-color:var(--y)}
+.opt.r{background:var(--r);color:var(--rt);border-color:var(--r)}
+.opt.ans{outline:4px solid var(--g);outline-offset:2px}
+.res{padding:12px;border-radius:12px;font-weight:700;margin:6px 0}
+.res.g{background:#dcfce7;color:#14532d}.res.y{background:#fef9c3;color:#713f12}.res.r{background:#fee2e2;color:#7f1d1d}
+.exp{padding:12px;border-radius:12px;background:var(--bd);font-size:15px;line-height:1.6;margin-top:8px}
+.rank{display:flex;justify-content:space-between;padding:12px;border-radius:12px;background:var(--bd);margin-bottom:8px;font-weight:600}
+.rank.w{background:linear-gradient(90deg,#fde68a,#fbbf24);color:#451a03}
+.big{text-align:center;font-size:44px;margin:4px 0}
+.hide{display:none}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+const CATS=[{n:'ความร้อน',e:'🔥'},{n:'อุณหภูมิ',e:'🌡️'},{n:'การเปลี่ยนสถานะของสสาร',e:'🧊'},{n:'การคำนวณ',e:'🧮'}];
+// o = [ข้อความ, หมวดของตัวเลือก, 1 = เฉลย]
+const Q=[
+{c:0,q:'พลังงานรูปหนึ่งที่ถ่ายโอนจากวัตถุที่มีอุณหภูมิสูงไปยังวัตถุที่มีอุณหภูมิต่ำกว่า เรียกว่าอะไร?',o:[['ความร้อน',0,1],['การแผ่รังสี',0],['เทอร์มอมิเตอร์',1],['การหลอมเหลว',2]],x:'ความร้อนคือพลังงานที่ไหลจากที่ร้อนกว่าไปที่เย็นกว่า ส่วนการแผ่รังสีเป็นเพียงวิธีหนึ่งของการถ่ายโอนความร้อน'},
+{c:0,q:'จับปลายช้อนโลหะด้านหนึ่ง แล้วจุ่มอีกด้านในน้ำร้อน ไม่นานมือก็ร้อนตาม เกิดจากการถ่ายโอนความร้อนแบบใด?',o:[['การนำความร้อน',0,1],['การพาความร้อน',0],['องศาเซลเซียส',1],['การระเหย',2]],x:'การนำความร้อนเกิดในของแข็ง โดยอนุภาคส่งพลังงานต่อกันไป โลหะนำความร้อนได้ดี การพาเกิดในของเหลวหรือแก๊สที่เคลื่อนที่ได้'},
+{c:0,q:'ความร้อนจากดวงอาทิตย์เดินทางผ่านอวกาศที่เป็นสุญญากาศมาถึงโลกได้ด้วยวิธีใด?',o:[['การแผ่รังสีความร้อน',0,1],['การนำความร้อน',0],['จุดเดือด',2],['เทอร์มอมิเตอร์',1]],x:'การแผ่รังสีไม่ต้องอาศัยตัวกลาง จึงผ่านสุญญากาศได้ ส่วนการนำและการพาต้องมีตัวกลาง'},
+{c:1,q:'เครื่องมือที่ใช้วัดอุณหภูมิ คืออะไร?',o:[['เทอร์มอมิเตอร์',1,1],['องศาเซลเซียส',1],['การควบแน่น',2],['แคลอรี',0]],x:'เทอร์มอมิเตอร์คือเครื่องมือวัด ส่วนองศาเซลเซียสเป็นหน่วยวัดอุณหภูมิ ไม่ใช่เครื่องมือ'},
+{c:1,q:'หน่วยของอุณหภูมิในระบบ SI คือข้อใด?',o:[['เคลวิน',1,1],['ฟาเรนไฮต์',1],['จูล',0],['การระเหิด',2]],x:'ระบบ SI ใช้เคลวิน (K) เป็นหน่วยอุณหภูมิ ส่วนจูลเป็นหน่วยของพลังงานความร้อน'},
+{c:2,q:'น้ำแข็งที่ถูกความร้อนแล้วกลายเป็นน้ำ เรียกการเปลี่ยนสถานะนี้ว่าอะไร?',o:[['การหลอมเหลว',2,1],['การแข็งตัว',2],['การพาความร้อน',0],['เคลวิน',1]],x:'ของแข็งรับความร้อนแล้วกลายเป็นของเหลวคือ การหลอมเหลว ส่วนการแข็งตัวเป็นกระบวนการย้อนกลับ'},
+{c:2,q:'ไอน้ำในอากาศมาเกาะที่ข้างแก้วน้ำเย็นจนกลายเป็นหยดน้ำ เรียกว่าอะไร?',o:[['การควบแน่น',2,1],['การระเหย',2],['การแผ่รังสี',0],['องศาเซลเซียส',1]],x:'แก๊ส (ไอน้ำ) เสียความร้อนแล้วกลายเป็นของเหลว เรียกว่า การควบแน่น'},
+{c:2,q:'ลูกเหม็นที่วางในตู้เสื้อผ้าค่อย ๆ เล็กลงโดยไม่เปียกก่อน เพราะเปลี่ยนจากของแข็งเป็นแก๊สโดยตรง เรียกว่าอะไร?',o:[['การระเหิด',2,1],['การเดือด',2],['จูล',0],['เคลวิน',1]],x:'การเปลี่ยนจากของแข็งเป็นแก๊สโดยตรง คือ การระเหิด เช่น ลูกเหม็นและน้ำแข็งแห้ง'},
+{c:3,q:'น้ำมวล 2 กิโลกรัม ต้องการเพิ่มอุณหภูมิ 10 °C (น้ำมีค่า c = 4,200 J/kg·°C) ต้องใช้ความร้อนกี่จูล? (ใช้ Q = mcΔT)',o:[['84,000 จูล',3,1],['8,400 จูล',3],['10 องศาเซลเซียส',1],['การหลอมเหลว',2]],x:'Q = 2 × 4,200 × 10 = 84,000 จูล ส่วน 10 °C เป็นค่าอุณหภูมิที่เปลี่ยน ไม่ใช่ปริมาณความร้อน'},
+{c:3,q:'อุณหภูมิห้อง 20 °C เท่ากับกี่เคลวิน? (ใช้ K = °C + 273)',o:[['293 K',3,1],['253 K',3],['เทอร์มอมิเตอร์',1],['การนำความร้อน',0]],x:'K = 20 + 273 = 293 เคลวิน ถ้าลบ 273 จะได้ 253 ซึ่งผิด เพราะต้องบวก'}
+];
+const $=s=>document.querySelector(s);
+const app=$('#app');
+let S={};
+function validate(){
+ const errs=[];
+ Q.forEach((q,i)=>{
+  const ok=q.o.filter(o=>o[2]);
+  if(q.o.length!==4)errs.push('ข้อ '+(i+1)+': ต้องมี 4 ตัวเลือก');
+  if(ok.length!==1)errs.push('ข้อ '+(i+1)+': ต้องมีเฉลย 1 ข้อ');
+  else if(ok[0][1]!==q.c)errs.push('ข้อ '+(i+1)+': หมวดของเฉลยไม่ตรงหมวดคำถาม');
+  if(q.o.filter(o=>o[1]===q.c).length!==2)errs.push('ข้อ '+(i+1)+': ต้องมีตัวเลือกหมวดเดียวกับเฉลยที่ผิดอีก 1 ข้อ');
+  if(new Set(q.o.map(o=>o[0])).size!==4)errs.push('ข้อ '+(i+1)+': ตัวเลือกซ้ำกัน');
+ });
+ return errs;
+}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function home(){
+ const errs=validate();
+ const cnt=Q.reduce((m,q)=>(m[q.c]++,m),[0,0,0,0]);
+ app.innerHTML=`<div class="card"><div class="big">🕵️‍♀️</div><h1 style="text-align:center">Word Detective</h1>
+ <p class="mut" style="text-align:center;margin:0">นักสืบคำศัพท์วิทยาศาสตร์ ม.1 เรื่อง ความร้อนกับการเปลี่ยนแปลงอุณหภูมิของสสาร</p>
+ <div class="cats">${CATS.map((c,i)=>`<div class="cat c${i}">${c.e} ${c.n}<br><span style="font-weight:400">${cnt[i]} ข้อ</span></div>`).join('')}</div>
+ <h2>📜 กติกา</h2><ol class="rules">
+ <li>อ่านคำถาม แล้วเลือกคำตอบ 1 ข้อจาก 4 ตัวเลือก</li>
+ <li>🟢 ถูก ได้ 10 คะแนน</li>
+ <li>🟡 ผิด แต่ตัวเลือกอยู่หมวดเดียวกับเฉลย ได้ 5 คะแนน</li>
+ <li>🔴 ผิดและอยู่คนละหมวด ได้ 0 คะแนน</li>
+ <li>ตอบได้ข้อละ 1 ครั้ง แล้วระบบจะเฉลยให้</li>
+ <li>ครบ 10 ข้อ รวมคะแนนและประกาศผู้ชนะ</li></ol>
+ <div class="chk ${errs.length?'bad':''}">${errs.length?'⚠️ พบข้อผิดพลาด:<br>'+errs.join('<br>'):'✅ ตรวจสอบแล้ว: หมวดของตัวเลือกและเฉลยถูกต้องครบทั้ง '+Q.length+' ข้อ'}</div>
+ <label class="mut" style="display:block;margin-top:14px">จำนวนผู้เล่น (เล่นผลัดกันในเครื่องเดียว)
+ <select id="np">${[1,2,3,4].map(n=>`<option value="${n}">${n} คน</option>`).join('')}</select></label>
+ <div id="names"></div>
+ <button class="btn" id="go" ${errs.length?'disabled':''}>🚀 เริ่มเกม</button></div>`;
+ const names=()=>{const n=+$('#np').value;$('#names').innerHTML=Array.from({length:n},(_,i)=>`<input class="nm" maxlength="14" placeholder="ชื่อผู้เล่น ${i+1}" value="${n>1?'':''}">`).join('')};
+ names();$('#np').onchange=names;
+ $('#go').onclick=()=>{
+  const p=[...document.querySelectorAll('.nm')].map((e,i)=>({name:e.value.trim()||'ผู้เล่น '+(i+1),score:0,g:0,y:0,r:0}));
+  S={p,qi:0,pi:0,order:shuffle(Q[0].o)};show();
+ };
+}
+function show(){
+ const q=Q[S.qi],P=S.p[S.pi],multi=S.p.length>1;
+ app.innerHTML=`<div class="card">
+ <div class="top"><b>ข้อ ${S.qi+1} / ${Q.length}</b><div class="chips">${S.p.map((x,i)=>`<span class="chip ${i===S.pi?'on':''}">${x.name}: ${x.score}</span>`).join('')}</div></div>
+ <div class="bar"><i style="width:${(S.qi/Q.length)*100}%"></i></div>
+ ${multi?`<div class="turn">🎯 ตาของ ${P.name}</div>`:''}
+ <div class="q">${q.q}</div>
+ <div id="opts">${S.order.map((o,i)=>`<button class="opt" data-i="${i}"><span>${String.fromCharCode(65+i)}. ${o[0]}</span><span class="tag hide"></span></button>`).join('')}</div>
+ <div id="fb"></div></div>`;
+ document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(+b.dataset.i));
+}
+function answer(i){
+ const q=Q[S.qi],P=S.p[S.pi],o=S.order[i];
+ const k=o[2]?'g':(o[1]===q.c?'y':'r'),pts={g:10,y:5,r:0}[k];
+ P.score+=pts;P[k]++;
+ const last=S.pi===S.p.length-1;
+ const btns=[...document.querySelectorAll('.opt')];
+ btns.forEach(b=>b.disabled=true);
+ btns[i].classList.add(k);
+ const msg={g:'🟢 ถูกต้อง! +10 คะแนน',y:'🟡 เกือบถูก! ตัวเลือกนี้อยู่หมวดเดียวกับเฉลย +5 คะแนน',r:'🔴 ผิดและอยู่คนละหมวด +0 คะแนน'}[k];
+ let h=`<div class="res ${k}">${msg}</div>`;
+ if(last){
+  btns.forEach((b,j)=>{const oo=S.order[j],t=b.querySelector('.tag');t.classList.remove('hide');t.className='tag c'+oo[1];t.textContent=CATS[oo[1]].e+' '+CATS[oo[1]].n;if(oo[2])b.classList.add('ans')});
+  h+=`<div class="exp">✅ เฉลย: <b>${S.order.find(x=>x[2])[0]}</b> (หมวด${CATS[q.c].n} ${CATS[q.c].e})<br>💡 ${q.x}</div>`;
+ }else h+=`<div class="exp">🙈 ยังไม่เฉลย รอให้ทุกคนตอบก่อน แล้วค่อยส่งต่อให้คนถัดไป</div>`;
+ const lbl=!last?'ส่งต่อให้ '+S.p[S.pi+1].name+' ➡️':(S.qi===Q.length-1?'🏁 ดูผลสรุป':'ข้อต่อไป ➡️');
+ h+=`<button class="btn" id="nx">${lbl}</button>`;
+ $('#fb').innerHTML=h;
+ $('#nx').onclick=()=>{
+  if(!last){S.pi++;show();return}
+  if(S.qi===Q.length-1){end();return}
+  S.qi++;S.pi=0;S.order=shuffle(Q[S.qi].o);show();
+ };
+}
+function end(){
+ const r=S.p.slice().sort((a,b)=>b.score-a.score),top=r[0].score;
+ const ws=r.filter(x=>x.score===top);
+ const multi=S.p.length>1;
+ const medal=['🥇','🥈','🥉','4️⃣'];
+ app.innerHTML=`<div class="card"><div class="big">🏆</div><h1 style="text-align:center">${multi?(ws.length>1?'เสมอกัน! ผู้ชนะคือ '+ws.map(x=>x.name).join(' และ '):'ผู้ชนะคือ '+ws[0].name+'!'):'เก่งมาก '+r[0].name+'!'}</h1>
+ <p class="mut" style="text-align:center">${top>=90?'นักสืบระดับยอดเยี่ยม! 🌟':top>=60?'นักสืบฝีมือดี ลองอีกรอบให้ได้เต็มนะ 💪':'ไม่เป็นไร ทบทวนอีกนิดแล้วลองใหม่ได้เลย 🔍'}</p>
+ ${r.map((x,i)=>`<div class="rank ${x.score===top&&multi?'w':''}"><span>${medal[i]||''} ${x.name}</span><span>${x.score} / 100 · 🟢${x.g} 🟡${x.y} 🔴${x.r}</span></div>`).join('')}
+ <button class="btn" id="again">🔄 เล่นอีกครั้ง</button></div>`;
+ $('#again').onclick=home;
+}
+home();
+</script>
+</body>
+</html>
